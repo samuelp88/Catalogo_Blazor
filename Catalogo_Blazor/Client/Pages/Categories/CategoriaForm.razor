@@ -1,0 +1,40 @@
+﻿<EditForm Model="@Categoria" OnValidSubmit=@OnValidSubmit>
+	<DataAnnotationsValidator/>
+	<ValidationSummary/>
+	<div class="form-group">
+		<label form="nome">Nome</label>
+		<div>
+			<InputText @bind-Value="@Categoria.Name" class="form-control" />
+			<ValidationMessage For="@(() => Categoria.Name)"/>
+		</div>
+	</div>
+	<div class="form-group">
+		<label form="descrição">Descrição</label>
+		<div>
+			<InputText @bind-Value="@Categoria.Description" class="form-control" />
+			<ValidationMessage For="@(()=>Categoria.Description)"/>
+		</div>
+	</div>
+	<br />
+	<button type="submit" class="btn btn-success">@ButtonTextSubmit</button>
+	<button class="btn" @onclick=@(() => navigation.NavigateTo("category"))>@ButtonTextCancel</button>
+</EditForm>
+
+@code {
+	[Inject]
+	public NavigationManager navigation { get; set; }
+
+	[Parameter]
+	public Category Categoria { get; set; }
+
+	[Parameter]
+	public string ButtonTextSubmit { get; set; } = "Salvar";
+
+	[Parameter]
+	public string ButtonTextCancel { get; set; } = "Cancelar";
+
+	[Parameter]
+	public EventCallback OnValidSubmit { get; set; }
+
+
+}

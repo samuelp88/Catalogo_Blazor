@@ -1,0 +1,97 @@
+﻿@page "/category"
+@using System.Text.Json
+@inject HttpClient Http
+
+<h3>Index</h3>
+@if(categories is null)
+{
+	<p><em>Carregando...</em></p>
+}
+else if(categories.Count == 0)
+{
+	<p><em>Não existem categorias cadastradas...</em></p>
+}
+else
+{
+	<div>
+		<a class="btn btn-success" href="category/create">Criar Categoria</a>
+	</div>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Categoria</th>
+				<th>Descrição</th>
+				<th>Editar</th>
+				<th>Deletar</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach(var categoria in categories)
+			{
+				<tr>
+					<td>@categoria.Name</td>
+					<td>@categoria.Description</td>
+					<td>
+						<a class="btn btn-primary" href="categoria/edit/@categoria.CategoryId">Editar</a>
+					</td>
+					<td>
+						<a class="btn btn-danger" @onclick="@(() => DeleteCategory(categoria.CategoryId))">Deletar</a>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+<hr />
+
+<Pagination QuantidadeTotalPaginas="QuantidadeTotalPaginas" paginaAtual="PaginaAtual"
+	Raio="2" PaginaSelecionada="PaginaSelecionada"></Pagination>
+
+@code {
+	List<Category>? categories { get; set; }
+
+	private int QuantidadeTotalPaginas;
+	private int PaginaAtual = 1;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadCategories();
+	}
+
+	private async Task PaginaSelecionada(int pagina)
+	{
+		PaginaAtual = pagina;
+		await LoadCategories(pagina);
+	}
+
+	async Task LoadCategories(int pagina = 1, int quantidadePorPagina = 5)
+	{
+		var httpResponse =
+			await Http.GetAsync($"api/category?page={pagina}&countPerPage={quantidadePorPagina}");
+
+		if(httpResponse.IsSuccessStatusCode)
+		{
+			QuantidadeTotalPaginas =
+				int.Parse(httpResponse.Headers.GetValues("totalPaginas").FirstOrDefault());
+
+			var responseString = await httpResponse.Content.ReadAsStringAsync();
+
+			categories = JsonSerializer.Deserialize<List<Category>>(responseString,
+				new JsonSerializerOptions
+				{
+					PropertyNameCaseInsensitive = true
+				});
+		}
+
+		//categories = await Http.GetFromJsonAsync<List<Category>>("/api/category");
+	}
+
+	async Task DeleteCategory(int categoryId)
+	{
+		await Http.DeleteAsync($"api/category/{categoryId}");
+		await LoadCategories();
+	}
+}
+
+
