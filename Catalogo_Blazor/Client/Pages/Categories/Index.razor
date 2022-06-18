@@ -16,6 +16,14 @@ else
 	<div>
 		<a class="btn btn-success" href="category/create">Criar Categoria</a>
 	</div>
+	<div class="form-inline">
+		<label class="sr-only" for="filter-name">Filtro</label>
+		<input type="text" class="form-control mb-2 mr-sm-2" placeholder="Filtrar pelo nome"
+			@bind="nomeFiltro"
+		/>
+		<button type="button" class="btn btn-primary mr-sm-2 mb-2" @onclick="Filtrar" >Filtrar</button>
+		<button type="button" class="btn btn-danger mb-2" @onclick="LimparFiltro" >Limpar</button>
+	</div>
 	<table class="table">
 		<thead>
 			<tr>
@@ -46,16 +54,30 @@ else
 <hr />
 
 <Pagination QuantidadeTotalPaginas="QuantidadeTotalPaginas" paginaAtual="PaginaAtual"
-	Raio="2" PaginaSelecionada="PaginaSelecionada"></Pagination>
+	Raio="1" PaginaSelecionada="PaginaSelecionada"></Pagination>
 
 @code {
 	List<Category>? categories { get; set; }
 
 	private int QuantidadeTotalPaginas;
 	private int PaginaAtual = 1;
+	private string nomeFiltro = string.Empty;
 
 	protected override async Task OnInitializedAsync()
 	{
+		await LoadCategories();
+	}
+
+	private async Task Filtrar()
+	{
+		PaginaAtual = 1;
+		await LoadCategories();
+	}
+
+	private async Task LimparFiltro()
+	{
+		nomeFiltro = string.Empty;
+		PaginaAtual = 1;
 		await LoadCategories();
 	}
 
@@ -68,7 +90,7 @@ else
 	async Task LoadCategories(int pagina = 1, int quantidadePorPagina = 5)
 	{
 		var httpResponse =
-			await Http.GetAsync($"api/category?page={pagina}&countPerPage={quantidadePorPagina}");
+			await Http.GetAsync($"api/category?page={pagina}&countPerPage={quantidadePorPagina}&name={nomeFiltro}");
 
 		if(httpResponse.IsSuccessStatusCode)
 		{

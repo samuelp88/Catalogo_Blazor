@@ -19,9 +19,16 @@ namespace Catalogo_Blazor.Server.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Category>>> Get([FromQuery] Pagination pagination)
+        public async Task<ActionResult<List<Category>>> Get([FromQuery] Pagination pagination,
+            [FromQuery] string? name = null)
         {
             var queryable = _context.Categories.AsQueryable();
+
+            if(!string.IsNullOrEmpty(name))
+            {
+                queryable = queryable.Where(c => c.Name.Contains(name));
+            }
+
             await HttpContext.InserirParametroEmPageResponse(queryable, pagination.CountPerPage);
 
             return await queryable.Paginate(pagination).ToListAsync();
