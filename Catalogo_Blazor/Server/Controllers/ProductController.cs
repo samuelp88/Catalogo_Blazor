@@ -18,9 +18,14 @@ namespace Catalogo_Blazor.Server.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Product>>> Get()
+        public async Task<ActionResult<List<Product>>> Get([FromQuery] int? categoryId = null)
         {
-            return await _context.Products.AsNoTracking().ToListAsync();
+            var productsQuery = _context.Products.AsNoTracking();
+
+            if(categoryId != null)
+                productsQuery = productsQuery.Where(x => x.CategoryId == categoryId);
+
+            return await productsQuery.ToListAsync();
         }
 
         [HttpGet("{id}", Name = "GetProduto")]
