@@ -1,0 +1,122 @@
+﻿@page "/product"
+
+@using System.Text.Json
+@inject HttpClient Http
+
+<h3>Index</h3>
+<div>
+	<a class="btn btn-success" href="product/create">Criar Produto</a>
+</div>
+<br />
+@if(products is null)
+{
+	<p><em>Carregando...</em></p>
+}
+else if(products.Count == 0)
+{
+	<p><em>Não existem produtos cadastrados...</em></p>
+}
+else
+{
+	<div class="form-inline">
+		<label class="sr-only" for="filter-name">Filtro</label>
+		<input type="text" class="form-control mb-2 mr-sm-2" placeholder="Filtrar pelo nome"
+			@bind="nomeFiltro"
+		/>
+		<button type="button" class="btn btn-primary mr-sm-2 mb-2" @onclick="Filtrar" >Filtrar</button>
+		<button type="button" class="btn btn-danger mb-2" @onclick="LimparFiltro" >Limpar</button>
+	</div>
+	<br />
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Produto</th>
+				<th>Descrição</th>
+				<th>Preço</th>
+				<th>Editar</th>
+				<th>Deletar</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach(var produto in products)
+			{
+				<tr>
+					<td>@produto.Name</td>
+					<td>@produto.Description</td>
+					<td>@produto.Price</td>
+					<td>
+						<a class="btn btn-primary" href="product/edit/@produto.ProductId">Editar</a>
+					</td>
+					<td>
+						<a class="btn btn-danger" @onclick="@(() => DeleteProduct(produto.ProductId))">Deletar</a>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+<hr />
+
+<Pagination QuantidadeTotalPaginas="QuantidadeTotalPaginas" paginaAtual="PaginaAtual"
+	Raio="1" PaginaSelecionada="PaginaSelecionada"></Pagination>
+
+@code {
+	List<Product>? products { get; set; }
+
+	private int QuantidadeTotalPaginas;
+	private int PaginaAtual = 1;
+	private string nomeFiltro = string.Empty;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadProducts();
+	}
+
+	private async Task Filtrar()
+	{
+		PaginaAtual = 1;
+		await LoadProducts();
+	}
+
+	private async Task LimparFiltro()
+	{
+		nomeFiltro = string.Empty;
+		PaginaAtual = 1;
+		await LoadProducts();
+	}
+
+	private async Task PaginaSelecionada(int pagina)
+	{
+		PaginaAtual = pagina;
+		await LoadProducts(pagina);
+	}
+
+	async Task LoadProducts(int pagina = 1, int quantidadePorPagina = 5)
+	{
+		//var httpResponse =
+		//	await Http.GetAsync($"api/product");
+
+		//if(httpResponse.IsSuccessStatusCode)
+		//{
+		//	////QuantidadeTotalPaginas =
+		//	////	int.Parse(httpResponse.Headers.GetValues("totalPaginas").FirstOrDefault());
+
+		//	var responseString = await httpResponse.Content.ReadAsStringAsync();
+
+		//	products = JsonSerializer.Deserialize<List<Product>>(responseString,
+		//		new JsonSerializerOptions
+		//		{
+		//			PropertyNameCaseInsensitive = true
+		//		});
+		//}
+
+		products = await Http.GetFromJsonAsync<List<Product>>("/api/product");
+	}
+
+	async Task DeleteProduct(int categoryId)
+	{
+		await Http.DeleteAsync($"api/product/{categoryId}");
+		await LoadProducts();
+	}
+}

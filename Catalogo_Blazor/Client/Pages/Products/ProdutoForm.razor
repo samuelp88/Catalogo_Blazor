@@ -1,0 +1,102 @@
+﻿<EditForm Model="@Produto" OnValidSubmit="@OnValidSubmit">
+	<DataAnnotationsValidator></DataAnnotationsValidator>
+	<div class="mb-3">
+		<label form="nome">Nome:</label>
+		<div>
+			<InputText @bind-Value="Produto.Name" class="form-control" ></InputText>
+			<ValidationMessage For="@(() => Produto.Name)" />
+		</div>
+	</div>
+	<div class="mb-3">
+		<label form="nome">Descrição:</label>
+		<div>
+			<InputTextArea @bind-Value="Produto.Description" class="form-control" ></InputTextArea>
+			<ValidationMessage For="@(() => Produto.Description)" />
+		</div>
+	</div>
+	<div class="mb-3">
+		<label form="preco">Preço: </label>
+		<div>
+			<InputNumber @bind-Value="Produto.Price" class="form-control" />
+			<ValidationMessage For="@(() => Produto.Price)" />
+		</div>
+	</div>
+	<div class="mb-3">
+		<label form="categoria">Categoria: </label>
+		<div>
+			<select @onchange="CategoriaSelectionChanged" class="form-control">
+				@if(categorias != null)
+				{
+					@foreach(var categoria in categorias)
+					{
+						<option value="@categoria.CategoryId" selected="@(categoria.CategoryId == Produto.CategoryId)">
+							@categoria.Name
+						</option>
+					}
+				}
+			</select>
+		</div>
+	</div>
+	<div class="mb-3">
+		<div>
+			<InputImage Label="Imagem:" ImagemSelecionada="ImagemSelecionada" ImagemRemota="@ImagemRemota"></InputImage>
+			<ValidationMessage For="@(() => Produto.ImageUrl)"></ValidationMessage>
+		</div>
+	</div>
+	<br />
+	<button type="submit" class="btn btn-success">
+		@ButtonTextSubmit
+	</button>
+	<button class="btn btn-danger" @onclick="@(() => navigation.NavigateTo("product"))">
+		@ButtonTextCancel
+	</button>
+</EditForm>
+
+@code {
+	List<Category> categorias;
+
+	[Inject]
+	private NavigationManager navigation { get; set; }
+
+	[Inject]
+	private HttpClient http { get; set; }
+
+	[Parameter]
+	public Product Produto { get; set; }
+
+	[Parameter]
+	public string ButtonTextSubmit { get; set; }
+
+	[Parameter]
+	public string ButtonTextCancel { get; set; }
+
+	[Parameter]
+	public EventCallback OnValidSubmit { get; set; }
+
+	[Parameter]
+	public string? ImagemRemota { get; set; }
+
+	private void ImagemSelecionada(string imagemBase64)
+	{
+		Produto.ImageUrl = imagemBase64;
+		ImagemRemota = null;
+	}
+
+	protected async override Task OnInitializedAsync()
+	{
+		await CarregaCategorias();
+	}
+
+	private async Task CarregaCategorias()
+	{
+		categorias = await http.GetFromJsonAsync<List<Category>>("api/category/all");
+	}
+
+	private void CategoriaSelectionChanged(ChangeEventArgs e)
+	{
+		if(int.TryParse(e.Value.ToString(), out int id))
+		{
+			Produto.CategoryId = id;
+		}
+	}
+}

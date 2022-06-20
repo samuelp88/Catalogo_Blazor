@@ -1,0 +1,17 @@
+﻿@page "/product/create"
+@inject HttpClient http
+@inject NavigationManager navigation
+
+<h2>Novo Produto</h2>
+
+<ProdutoForm Produto="@produto" OnValidSubmit=CriarProduto 
+	ButtonTextCancel="Voltar" ButtonTextSubmit="Criar">
+</ProdutoForm>
+
+@code {
+	private Product produto = new Product();
+	async Task CriarProduto() {
+		await http.PostAsJsonAsync("api/product", produto);
+		navigation.NavigateTo("product");
+	}
+}

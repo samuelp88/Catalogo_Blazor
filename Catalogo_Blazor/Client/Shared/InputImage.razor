@@ -1,0 +1,50 @@
+﻿<div>
+	<label>@Label</label>
+	<div>
+		<FileSelect @ref="imagemSelecaoArquivo" FilesSelected="ImagemArquivoSelecionado" Accept=".jpg,.jpeg,.png"></FileSelect>
+		<button type="button" @onclick="SelecionarImagem">Selecionar Imagem</button>
+	</div>
+</div>
+<div>
+	@if(imageBase64 != null)
+	{
+		<div>
+			<div style="margin:10px;">
+				<img src="data:image/jpeg;base64, @imageBase64" style="height: 150px;" />
+			</div>
+		</div>
+	}
+	@if(ImagemRemota != null)
+	{
+		<div>
+			<div style="margin:10px;">
+				<img src="data:image/jpeg;base64, @ImagemRemota" style="height: 150px;" />
+			</div>
+		</div>
+	}
+</div>
+
+@code {
+	[Parameter] public string Label { get; set; }
+	[Parameter] public string? ImagemRemota { get; set; }
+	[Parameter] public EventCallback<string> ImagemSelecionada { get; set; }
+
+	private string? imageBase64;
+	public FileSelect imagemSelecaoArquivo;
+
+	private void SelecionarImagem()
+	{
+		imagemSelecaoArquivo.SelectFiles();
+	}
+
+	private async Task ImagemArquivoSelecionado(SelectedFile[] arquivosSelecionados)
+	{
+		var arquivoSelecionado = arquivosSelecionados.FirstOrDefault();
+
+		var imageBytes = await imagemSelecaoArquivo.GetFileBytesAsync(arquivoSelecionado.Name);
+		imageBase64 = Convert.ToBase64String(imageBytes);
+		await ImagemSelecionada.InvokeAsync(imageBase64);
+		ImagemRemota = null;
+		StateHasChanged();
+	}
+}

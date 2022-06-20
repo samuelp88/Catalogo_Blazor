@@ -18,6 +18,12 @@ namespace Catalogo_Blazor.Server.Controllers
             _context = context;
         }
 
+        [HttpGet("all")]
+        public async Task<ActionResult<List<Category>>> Get()
+        {
+            return await _context.Categories.AsNoTracking().ToListAsync();
+        }
+
         [HttpGet]
         public async Task<ActionResult<List<Category>>> Get([FromQuery] Pagination pagination,
             [FromQuery] string? name = null)

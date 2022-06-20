@@ -11,20 +11,22 @@ namespace Catalogo_Blazor.Shared.Models
     {
         public int ProductId { get; set; }
 
+        [Required(ErrorMessage = "Nome obrigatório")]
         [MaxLength(100)]
         public string Name { get; set; } = string.Empty;
-        
+
+        [Required(ErrorMessage = "Descrição obrigatória")]
         [MaxLength(200)]
         public string Description { get; set; } = string.Empty;
        
         public decimal Price { get; set; }
-        
-        [MaxLength(250)]
+
+        [Required(ErrorMessage = "Imagem obrigatória")]
         public string ImageUrl { get; set; } = string.Empty;
 
         //Relationship
         public int CategoryId { get; set; }
-        public virtual Category Category { get; set; }
+        public virtual Category? Category { get; set; }
 
     }
 }
