@@ -1,0 +1,65 @@
+﻿@page "/catalog"
+@inject HttpClient http
+
+<div class="mb-3">
+	<select @onchange="CategoriaSelectionChanged" class="form-control">
+		@if(categories != null)
+		{
+			@foreach(var categoria in categories)
+			{
+				<option value="@categoria.CategoryId">
+					@categoria.Name
+				</option>
+			}
+		}
+	</select>
+</div>
+@if(products is null) {
+	<p><em>Carregando...</em></p>
+}
+else if (products.Count == 0)
+{
+	<p><em>Não existem produtos cadastrados...</em></p>
+}
+else
+{
+	<div class="row">
+		@foreach(var produto in products)
+		{
+			<Card Title="@produto.Name" Description="@($"{produto.Description} R${produto.Price}")"
+				ImageBase64="@produto.ImageUrl">
+			</Card>
+		}
+	</div>
+}
+
+@code {
+	List<Product> products { get; set; }
+	List<Category> categories { get; set; }
+
+	private int codigoCategoria;
+
+	protected async override Task OnInitializedAsync()
+	{
+		categories = await http.GetFromJsonAsync<List<Category>>("api/category/all");
+		codigoCategoria = categories[0].CategoryId;
+		await CarregaProdutos();
+	}
+
+	async Task CarregaProdutos()
+	{
+		products = await http.GetFromJsonAsync<List<Product>>($"api/product?categoryId={codigoCategoria}");
+		StateHasChanged();
+	}
+
+	async void CategoriaSelectionChanged(ChangeEventArgs e)
+	{
+		if(int.TryParse(e.Value as string, out int id))
+		{
+			codigoCategoria = id;
+			await CarregaProdutos();
+		}
+	}
+
+
+}

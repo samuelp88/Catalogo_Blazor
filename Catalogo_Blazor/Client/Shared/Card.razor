@@ -1,0 +1,33 @@
+﻿<div class="card" style="width: 18rem;">
+    @if(!string.IsNullOrEmpty(ImageUrl))
+    {
+        <img src="@ImageUrl" class="card-img-top" alt="@Alt">
+    }
+    @if(!string.IsNullOrEmpty(ImageBase64))
+    {
+        <img src="data:image/jpeg;base64, @ImageBase64" class="card-img-top" alt="@Alt">
+    }
+    <div class="card-body">
+        <h5 class="card-title">@Title</h5>
+        <p class="card-text">@Description</p>
+        <a href="#" class="btn btn-primary">Go somewhere</a>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string ImageBase64 { get; set; } = string.Empty;
+
+    [Parameter]
+    public string ImageUrl { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Title { get; set; } = "Card title";
+
+    [Parameter]
+    public string Alt { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Description { get; set; } = "Some quick example text to build on the card title and make up the bulk of the card's content.";
+
+}
