@@ -1,5 +1,7 @@
 ﻿using Catalogo_Blazor.Server.Context;
+using Catalogo_Blazor.Server.Util;
 using Catalogo_Blazor.Shared.Models;
+using Catalogo_Blazor.Shared.Resources;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +28,21 @@ namespace Catalogo_Blazor.Server.Controllers
                 productsQuery = productsQuery.Where(x => x.CategoryId == categoryId);
 
             return await productsQuery.ToListAsync();
+        }
+
+        [HttpGet("pages")]
+        public async Task<ActionResult<List<Product>>> Get([FromQuery] Pagination pagination, 
+            [FromQuery] string? name = null)
+        {
+            var queryable = _context.Products.AsQueryable();
+            if(!string.IsNullOrEmpty(name))
+            {
+                queryable = queryable.Where(x => x.Name.Contains(name));
+            }
+
+            await HttpContext.InserirParametroEmPageResponse(queryable, pagination.CountPerPage);
+
+            return await queryable.Paginate(pagination).ToListAsync();
         }
 
         [HttpGet("{id}", Name = "GetProduto")]

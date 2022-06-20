@@ -8,6 +8,15 @@
 	<a class="btn btn-success" href="product/create">Criar Produto</a>
 </div>
 <br />
+<div class="form-inline">
+	<label class="sr-only" for="filter-name">Filtro</label>
+	<input type="text" class="form-control mb-2 mr-sm-2" placeholder="Filtrar pelo nome"
+		@bind="nomeFiltro"
+	/>
+	<button type="button" class="btn btn-primary mr-sm-2 mb-2" @onclick="Filtrar" >Filtrar</button>
+	<button type="button" class="btn btn-danger mb-2" @onclick="LimparFiltro" >Limpar</button>
+</div>
+<br />
 @if(products is null)
 {
 	<p><em>Carregando...</em></p>
@@ -18,14 +27,6 @@ else if(products.Count == 0)
 }
 else
 {
-	<div class="form-inline">
-		<label class="sr-only" for="filter-name">Filtro</label>
-		<input type="text" class="form-control mb-2 mr-sm-2" placeholder="Filtrar pelo nome"
-			@bind="nomeFiltro"
-		/>
-		<button type="button" class="btn btn-primary mr-sm-2 mb-2" @onclick="Filtrar" >Filtrar</button>
-		<button type="button" class="btn btn-danger mb-2" @onclick="LimparFiltro" >Limpar</button>
-	</div>
 	<br />
 	<table class="table">
 		<thead>
@@ -57,6 +58,7 @@ else
 }
 
 <hr />
+
 
 <Pagination QuantidadeTotalPaginas="QuantidadeTotalPaginas" paginaAtual="PaginaAtual"
 	Raio="1" PaginaSelecionada="PaginaSelecionada"></Pagination>
@@ -94,24 +96,24 @@ else
 
 	async Task LoadProducts(int pagina = 1, int quantidadePorPagina = 5)
 	{
-		//var httpResponse =
-		//	await Http.GetAsync($"api/product");
+		var httpResponse =
+			await Http.GetAsync($"api/product/pages?page={pagina}&countPerPage={quantidadePorPagina}&name={nomeFiltro}");
 
-		//if(httpResponse.IsSuccessStatusCode)
-		//{
-		//	////QuantidadeTotalPaginas =
-		//	////	int.Parse(httpResponse.Headers.GetValues("totalPaginas").FirstOrDefault());
+		if(httpResponse.IsSuccessStatusCode)
+		{
+			QuantidadeTotalPaginas =
+				int.Parse(httpResponse.Headers.GetValues("totalPaginas").FirstOrDefault());
 
-		//	var responseString = await httpResponse.Content.ReadAsStringAsync();
+			var responseString = await httpResponse.Content.ReadAsStringAsync();
 
-		//	products = JsonSerializer.Deserialize<List<Product>>(responseString,
-		//		new JsonSerializerOptions
-		//		{
-		//			PropertyNameCaseInsensitive = true
-		//		});
-		//}
+			products = JsonSerializer.Deserialize<List<Product>>(responseString,
+				new JsonSerializerOptions
+				{
+					PropertyNameCaseInsensitive = true
+				});
+		}
 
-		products = await Http.GetFromJsonAsync<List<Product>>("/api/product");
+		//products = await Http.GetFromJsonAsync<List<Product>>("/api/product");
 	}
 
 	async Task DeleteProduct(int categoryId)

@@ -1,0 +1,19 @@
+﻿@page "/catalog/details/{produtoid:int}"
+@inject HttpClient http
+
+<Card Title="@produto.Name" Description=@($"{produto.Description} R$ {produto.Price}")
+	ImageBase64="@produto.ImageUrl" ButtonText="Voltar" Href="@($"catalog/{produto.CategoryId}")">
+</Card>
+
+
+@code {
+	Product produto { get; set; } = new Product();
+
+	[Parameter]
+	public int produtoid { get; set; }
+
+	protected async override Task OnParametersSetAsync()
+	{
+		produto = await http.GetFromJsonAsync<Product>($"api/product/{produtoid}");
+	}
+}
