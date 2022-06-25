@@ -5,3 +5,16 @@
 <h1>Catálogo de Produtos</h1>
 <hr />
 <h2>samuelp88.net</h2>
+
+<AuthorizeView>
+	<Authorized>
+		<h2>
+			Olá, @context.User.Identity.Name!
+		</h2>
+	</Authorized>
+	<NotAuthorized>
+		<h2>
+			Usuário não autorizado.
+		</h2>
+	</NotAuthorized>
+</AuthorizeView>

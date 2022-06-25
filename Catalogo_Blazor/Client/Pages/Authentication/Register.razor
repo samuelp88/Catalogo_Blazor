@@ -1,0 +1,66 @@
+﻿@page "/register"
+@inject HttpClient http
+@inject NavigationManager navigation
+
+<h2>Registrar</h2>
+
+<Warning Exibir="Exibir">
+	<h5>@Mensagem</h5>
+</Warning>
+
+<div class="container col-6">
+	<div class=card-body>
+		<h5 class="card-title">Login</h5>
+		<EditForm Model="userInfo" OnValidSubmit="RegistrarUsuario">
+			<DataAnnotationsValidator />
+			<div class="mb-3">
+				<label>Email</label>
+				<InputText class="form-control" @bind-Value="userInfo.Email" />
+				<ValidationMessage For="@(() => userInfo.Email)" />
+			</div>
+			<div class="mb-3">
+				<label>Password</label>
+				<InputText type="password" class="form-control" @bind-Value="userInfo.Password" />
+				<ValidationMessage For="@(() => userInfo.Password)" />
+			</div>
+			<button type="submit" class="btn btn-outline-primary btn-sm">Login</button>
+		</EditForm>
+	</div>
+</div>
+
+@code {
+	private UserInfo userInfo = new UserInfo();
+	private bool Exibir = false;
+
+	[Parameter]
+	public string Mensagem { get; set; }
+
+	private async Task RegistrarUsuario()
+	{
+		try
+		{
+			var registerAsJson = JsonSerializer.Serialize(userInfo);
+			var httpResponse = await http.PostAsync("api/account/register",
+				new StringContent(registerAsJson, Encoding.UTF8, "application/json"));
+
+			if(!httpResponse.IsSuccessStatusCode)
+			{
+				ExibirMensagem($"Não foi possível registrar o usuário. (Erro: {httpResponse.StatusCode})");
+			}
+			else
+			{
+				navigation.NavigateTo("/login");
+			}
+		}
+		catch
+		{
+			ExibirMensagem("Não foi possível registrar o usuário.");
+		}
+	}
+
+	private void ExibirMensagem(string message)
+	{
+		Exibir = true;
+		Mensagem = message;
+	}
+}

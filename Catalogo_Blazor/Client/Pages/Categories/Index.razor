@@ -2,61 +2,67 @@
 @using System.Text.Json
 @inject HttpClient Http
 
-<h3>Index</h3>
-@if(categories is null)
-{
-	<p><em>Carregando...</em></p>
-}
-else if(categories.Count == 0)
-{
-	<p><em>Não existem categorias cadastradas...</em></p>
-}
-else
-{
-	<div>
-		<a class="btn btn-success" href="category/create">Criar Categoria</a>
-	</div>
-	<br />
-	<div class="form-inline">
-		<label class="sr-only" for="filter-name">Filtro</label>
-		<input type="text" class="form-control mb-2 mr-sm-2" placeholder="Filtrar pelo nome"
-			@bind="nomeFiltro"
-		/>
-		<button type="button" class="btn btn-primary mr-sm-2 mb-2" @onclick="Filtrar" >Filtrar</button>
-		<button type="button" class="btn btn-danger mb-2" @onclick="LimparFiltro" >Limpar</button>
-	</div>
-	<br />
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Categoria</th>
-				<th>Descrição</th>
-				<th>Editar</th>
-				<th>Deletar</th>
-			</tr>
-		</thead>
-		<tbody>
-			@foreach(var categoria in categories)
-			{
-				<tr>
-					<td>@categoria.Name</td>
-					<td>@categoria.Description</td>
-					<td>
-						<a class="btn btn-primary" href="categoria/edit/@categoria.CategoryId">Editar</a>
-					</td>
-					<td>
-						<a class="btn btn-danger" @onclick="@(() => DeleteCategory(categoria.CategoryId))">Deletar</a>
-					</td>
-				</tr>
-			}
-		</tbody>
-	</table>
-}
+<AuthorizeView>
+	<Authorized>
+		<h3>Index</h3>
+		@if (categories is null)
+		{
+			<p><em>Carregando...</em></p>
+		}
+		else if (categories.Count == 0)
+		{
+			<p><em>Não existem categorias cadastradas...</em></p>
+		}
+		else
+		{
+			<div>
+				<a class="btn btn-success" href="category/create">Criar Categoria</a>
+			</div>
+			<br />
+			<div class="form-inline">
+				<label class="sr-only" for="filter-name">Filtro</label>
+				<input type="text" class="form-control mb-2 mr-sm-2" placeholder="Filtrar pelo nome"
+				   @bind="nomeFiltro" />
+				<button type="button" class="btn btn-primary mr-sm-2 mb-2" @onclick="Filtrar">Filtrar</button>
+				<button type="button" class="btn btn-danger mb-2" @onclick="LimparFiltro">Limpar</button>
+			</div>
+			<br />
+			<table class="table">
+				<thead>
+					<tr>
+						<th>Categoria</th>
+						<th>Descrição</th>
+						<th>Editar</th>
+						<th>Deletar</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var categoria in categories)
+					{
+						<tr>
+							<td>@categoria.Name</td>
+							<td>@categoria.Description</td>
+							<td>
+								<a class="btn btn-primary" href="categoria/edit/@categoria.CategoryId">Editar</a>
+							</td>
+							<td>
+								<a class="btn btn-danger" @onclick="@(() => DeleteCategory(categoria.CategoryId))">Deletar</a>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		}
 
-<hr />
+		<hr />
 
-<Pagination QuantidadeTotalPaginas="QuantidadeTotalPaginas" paginaAtual="PaginaAtual"
-	Raio="1" PaginaSelecionada="PaginaSelecionada"></Pagination>
+		<Pagination QuantidadeTotalPaginas="QuantidadeTotalPaginas" paginaAtual="PaginaAtual"
+					Raio="1" PaginaSelecionada="PaginaSelecionada"></Pagination>
+	</Authorized>
+	<NotAuthorized>
+		Não Autorizado
+	</NotAuthorized>
+</AuthorizeView>
 
 @code {
 	List<Category>? categories { get; set; }
@@ -94,7 +100,7 @@ else
 		var httpResponse =
 			await Http.GetAsync($"api/category?page={pagina}&countPerPage={quantidadePorPagina}&name={nomeFiltro}");
 
-		if(httpResponse.IsSuccessStatusCode)
+		if (httpResponse.IsSuccessStatusCode)
 		{
 			QuantidadeTotalPaginas =
 				int.Parse(httpResponse.Headers.GetValues("totalPaginas").FirstOrDefault());
@@ -103,9 +109,9 @@ else
 
 			categories = JsonSerializer.Deserialize<List<Category>>(responseString,
 				new JsonSerializerOptions
-				{
-					PropertyNameCaseInsensitive = true
-				});
+					{
+						PropertyNameCaseInsensitive = true
+					});
 		}
 
 		//categories = await Http.GetFromJsonAsync<List<Category>>("/api/category");
